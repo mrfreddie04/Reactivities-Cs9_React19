@@ -11,10 +11,28 @@ builder.Services.AddDbContext<AppDbContext>(options =>
   options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.AddCors();
+// builder.Services.AddCors(options =>
+// {
+//   options.AddDefaultPolicy(policyBuilder =>
+//   {
+//     policyBuilder.WithOrigins(builder.Configuration.GetValue<string>("ClientUrl"))
+//       .AllowAnyMethod()
+//       .AllowAnyHeader();
+//   });				
+// });	
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 //app.UseAuthorization();
+
+app.UseCors( options =>
+{
+  options.WithOrigins("http://localhost:3000","https://localhost:3000")
+      .AllowAnyMethod()
+      .AllowAnyHeader();	  
+});
 
 app.MapControllers();
 
