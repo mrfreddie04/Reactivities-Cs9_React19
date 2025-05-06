@@ -1,14 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import agent from "./../api/agent";
+import { AxiosResponse } from 'axios';
 
-export const useActivities = () => {
-  const { data: activities, isPending } = useQuery({ 
+export const useActivities = (id?: string) => {
+  const { data: activities, isPending:  isLoadingActivities } = useQuery({ 
     queryKey: ['activities'], 
     queryFn: async () => {
       const response = await agent.get<Activity[]>("/activities");
       return response.data;
     } 
   });
+
+  const { data: activity, isLoading: isLoadingActivity } = useQuery({ 
+    queryKey: ['activities', id], 
+    queryFn: async () => {
+      const response = await agent.get<Activity>(`/activities/${id}`);
+      return response.data;
+    },
+    enabled: !!id 
+  });  
 
   const queryClient = useQueryClient();
 
@@ -23,7 +33,8 @@ export const useActivities = () => {
 
   const createActivity = useMutation({
     mutationFn: async (activity: Activity) => {
-      await agent.post<Activity>("/activities", activity);
+      const response = await agent.post<string, AxiosResponse<string,Activity>, Activity>("/activities", activity);
+      return response.data;
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['activities'] });      
@@ -41,7 +52,9 @@ export const useActivities = () => {
 
   return { 
     activities, 
-    isPending,
+    isLoadingActivities,
+    activity,
+    isLoadingActivity,
     updateActivity,
     createActivity,
     deleteActivity
