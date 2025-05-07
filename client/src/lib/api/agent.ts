@@ -1,5 +1,5 @@
 import axios from "axios";
-import { sleep } from "../utils";
+import { sleep } from "../util/util.ts";
 
 const agent = axios.create({
   baseURL: import.meta.env.VITE_API_URL
