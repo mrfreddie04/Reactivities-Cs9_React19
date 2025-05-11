@@ -35,7 +35,10 @@ export default function NavBar() {
               </MenuItemLink>     
               <MenuItemLink component={NavLink} to='/counter'>
                 Counter
-              </MenuItemLink>                                             
+              </MenuItemLink>           
+              <MenuItemLink component={NavLink} to='/errors'>
+                Errors
+              </MenuItemLink>                                                   
             </Box>
             <Button 
               size="large" 

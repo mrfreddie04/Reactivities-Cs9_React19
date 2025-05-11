@@ -4,6 +4,7 @@ using MediatR;
 using Domain;
 using Application.Activities.Queries;
 using Application.Activities.Commands;
+using Application.Activities.DTOs;
 
 namespace API.Controllers;
 
@@ -12,36 +13,33 @@ public class ActivitiesController : BaseApiController
   [HttpGet]
   public async Task<ActionResult<IEnumerable<Activity>>> GetActivities(CancellationToken cancellationToken)
   {
-    var activities = await Mediator.Send(new GetActivityList.Query(),cancellationToken);
-    return Ok(activities);
+    return Ok(await Mediator.Send(new GetActivityList.Query(),cancellationToken));
   }
 
   [HttpGet("{id}")]
   public async Task<ActionResult<Activity>> GetActivityDetailById([FromRoute] string id)
   {
-    var activity = await Mediator.Send(new GetActivityDetails.Query() { Id = id });
-    return Ok(activity);
+    //throw new Exception("Server test error");
+    
+    return HandleResult(await Mediator.Send(new GetActivityDetails.Query() { Id = id }));
   }
 
   [HttpPost]
-  public async Task<ActionResult<string>> CreateActivity([FromBody] Activity activity)
+  public async Task<ActionResult<string>> CreateActivity([FromBody] CreateActivityDto activityDto)
   {
-    var id = await Mediator.Send(new CreateActivity.Command() { Activity = activity });
-    return Ok(id);
+    return HandleResult(await Mediator.Send(new CreateActivity.Command() { ActivityDto = activityDto }));
   }
 
   [HttpPut]
-  public async Task<ActionResult> EditActivity([FromBody] Activity activity)
+  public async Task<ActionResult> EditActivity([FromBody] EditActivityDto activity)
   {
-    await Mediator.Send(new EditActivity.Command() { Activity = activity });
-    return NoContent();
+    return HandleResult(await Mediator.Send(new EditActivity.Command() { ActivityDto = activity }));
   }
 
   [HttpDelete("{id}")]
   public async Task<ActionResult> DeleteActivity([FromRoute] string id)
   {
-    await Mediator.Send(new DeleteActivity.Command() { Id = id });
-    return Ok();
+    return HandleResult(await Mediator.Send(new DeleteActivity.Command() { Id = id }));
   }
 }
 
