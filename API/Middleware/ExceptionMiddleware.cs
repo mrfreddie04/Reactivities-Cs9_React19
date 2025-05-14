@@ -48,7 +48,7 @@ public class ExceptionMiddleware(ILogger<ExceptionMiddleware> logger, IHostEnvir
       Status = context.Response.StatusCode,
       Type = "ValidationFailure",
       Title = "ValidationError",
-      Detail = "One or more validation errors hsd occurred"
+      Detail = "One or more validation errors has occurred"
     };
     await context.Response.WriteAsJsonAsync(validationProblemDetails);
   }
