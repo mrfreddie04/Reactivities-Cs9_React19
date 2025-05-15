@@ -5,11 +5,18 @@ using Application.Core;
 using Application.Activities.Validators;
 using Persistence;
 using API.Middleware;
+using Domain;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => {
+  var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+  options.Filters.Add(new AuthorizeFilter(policy));
+});
 
 builder.Services.AddCors();
 
@@ -30,6 +37,12 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateActivityValidator>();
 
 builder.Services.AddTransient<IMiddleware, ExceptionMiddleware>(); 
 
+builder.Services.AddIdentityApiEndpoints<User>(options => {
+  options.User.RequireUniqueEmail = true;
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<AppDbContext>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,11 +52,16 @@ app.UseMiddleware<IMiddleware>();
 app.UseCors( options =>
 {
   options.WithOrigins("http://localhost:3000","https://localhost:3000")
-      .AllowAnyMethod()
-      .AllowAnyHeader();	  
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials();	  
 });
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
+app.MapGroup("api").MapIdentityApi<User>();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -51,8 +69,10 @@ using (var scope = app.Services.CreateScope())
   try
   {
     var context = services.GetRequiredService<AppDbContext>();
+    var userManager = services.GetRequiredService<UserManager<User>>();
     await context.Database.MigrateAsync(); //create db & apply pending migrations
     await DbInitializer.SeedDataAsync(context); //seed data
+    await DbInitializer.SeedUsersAsync(userManager); //seed users
   }
   catch (Exception ex)
   {
