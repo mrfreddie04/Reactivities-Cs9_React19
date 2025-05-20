@@ -11,6 +11,13 @@ type Activity = {
   longitude: number;
 };
 
+type UserDto = {
+  id: string;
+  displayName: string;
+  email: string;
+  imageUrl?: string;
+}
+
 type CreateActivityDto = {
   title: string;
   date: Date;

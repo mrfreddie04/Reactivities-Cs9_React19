@@ -6,10 +6,12 @@ import ActivityFilters from "./ActivityFilters";
 export default function ActivityDashboard() {
   const { activities, isLoadingActivities } = useActivities(); 
 
-  if(!activities || isLoadingActivities ) {
-    return (
-      <Typography>Loading...</Typography>
-    );
+  if(isLoadingActivities ) {
+    return (<Typography>Loading...</Typography>);
+  }
+
+  if(!activities ) {
+    return (<Typography>No activities found</Typography>);
   }
 
   return (

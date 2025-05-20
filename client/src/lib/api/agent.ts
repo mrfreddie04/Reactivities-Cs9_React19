@@ -5,7 +5,8 @@ import { toast } from "react-toastify";
 import { router } from "../../app/router/Routes.tsx";
 
 const agent = axios.create({
-  baseURL: import.meta.env.VITE_API_URL
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true
 });
 
 agent.interceptors.request.use ( config => {
@@ -22,6 +23,8 @@ agent.interceptors.response.use(
   async (error) => {
     await sleep(1000);
     store.uiStore.isIdle();
+
+    //console.log("Error in response interceptor", error);
 
     const {status, data }  = error.response;
     switch( status) {

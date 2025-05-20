@@ -2,17 +2,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import agent from "./../api/agent";
 import { AxiosResponse } from 'axios';
 import { useLocation } from 'react-router';
+import { useAccount } from './useAccount';
 
 export const useActivities = (id?: string) => {
   const { pathname } = useLocation();
+  const queryClient = useQueryClient();
+  const { currentUser } = useAccount();
 
-  const { data: activities, isPending:  isLoadingActivities } = useQuery({ 
+  const { data: activities, isLoading:  isLoadingActivities } = useQuery({ 
     queryKey: ['activities'], 
     queryFn: async () => {
       const response = await agent.get<Activity[]>("/activities");
       return response.data;
     },
-    enabled: !id && pathname === '/activities'
+    enabled: !id && pathname === '/activities' && !!currentUser
     //,staleTime: 1000 * 60 * 5
   });
 
@@ -22,10 +25,8 @@ export const useActivities = (id?: string) => {
       const response = await agent.get<Activity>(`/activities/${id}`);
       return response.data;
     },
-    enabled: !!id 
+    enabled: !!id && !!currentUser
   });  
-
-  const queryClient = useQueryClient();
 
   const updateActivity = useMutation({
     mutationFn: async (activity: Activity) => {
